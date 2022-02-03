@@ -1,0 +1,41 @@
+version: '3.2'
+services:
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: pro-node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.systemd'
+      - '--collector.processes'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    ports:
+      - 127.0.0.1:9100:9100
+    expose:
+      - 9100
+    privileged: true
+
+  nginx-prometheus-exporter:
+    image: nginx/nginx-prometheus-exporter
+    container_name: pro-nginx-exporter
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command:
+      - '-nginx.scrape-uri'
+      - 'http://host.docker.internal:81/metrics'
+    ports:
+      - 127.0.0.1:9102:9113
+    expose:
+      - 9100
+      
+#sudo ufw allow from 80.97.226.102 to any port 9101
+#sudo ufw allow from 80.97.226.102 to any port 9102 
