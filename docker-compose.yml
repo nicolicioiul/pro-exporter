@@ -55,6 +55,17 @@ services:
   redis:
     image: redis:latest
     container_name: redis-prometheus
-    restart: unless-stopped       
+    restart: unless-stopped
+    
+   mysql-prometheus-exporter:
+    image: prom/mysqld-exporter
+    container_name: mysql-prometheus-exporter
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - DATA_SOURCE_NAME=$user:$pass@tcp($db_host:3306)/database
+    ports:
+      - 127.0.0.1:9105:9104    
 #sudo ufw allow from 80.97.226.102 to any port 9101
 #sudo ufw allow from 80.97.226.102 to any port 9102 
